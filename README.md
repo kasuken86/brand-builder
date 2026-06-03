@@ -1,5 +1,5 @@
 <div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
+<img width="1329" height="871" alt="GHBanner" src="img1.png" />
 </div>
 
 # Brand Builder
@@ -9,6 +9,9 @@
 Google AI Studio（Gemini）で作成されたReactアプリです。
 
 ![Brand Builder](https://via.placeholder.com/800x400/141414/FFFFFF?text=Brand+Builder+Demo) <!-- 後で実際のスクリーンショットを追加推奨 -->
+<div align="center">
+<img width="638" height="1049" alt="GHBanner" src="img2.png" />
+</div>
 
 ## ✨ 主な機能
 
