@@ -5,7 +5,7 @@ const getAI = (apiKey?: string) => new GoogleGenAI({ apiKey: apiKey || process.e
 export async function generateVisualIdentity(productDescription: string) {
   const ai = getAI();
   const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
+    model: "gemini-flash-latest",
     contents: `あなたはシニア・アートディレクターです。以下の製品説明をもとに、画像生成AIが製品の一貫性を保てるような、詳細な「ビジュアル・アイデンティティ」を確立してください。
 形状、色（パントーン指定のように具体的）、素材の質感（マット、メタリック、ガラス等）、ロゴの特徴、独特なディテールを含めてください。
 出力は日本語で。

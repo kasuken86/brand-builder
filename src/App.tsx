@@ -31,8 +31,6 @@ declare global {
   }
 }
 
-import JSZip from 'jszip';
-
 interface BrandState {
   name: string;
   visualDescription: string;
@@ -132,90 +130,21 @@ export default function App() {
     }
   };
 
-  const dataURLtoBlob = (dataurl: string) => {
-    const arr = dataurl.split(',');
-    const mime = arr[0].match(/:(.*?);/)?.[1];
-    const bstr = atob(arr[1]);
-    let n = bstr.length;
-    const u8arr = new Uint8Array(n);
-    while (n--) {
-      u8arr[n] = bstr.charCodeAt(n);
-    }
-    return new Blob([u8arr], { type: mime });
-  };
-
   const handleDownload = (dataUrl: string, filename: string) => {
-    try {
-      const blob = dataURLtoBlob(dataUrl);
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error('Download failed:', err);
-      // Fallback to direct data URL if blob fails
-      const link = document.createElement('a');
-      link.href = dataUrl;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
+    const link = document.createElement('a');
+    link.href = dataUrl;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
-  const handleExportAll = async () => {
-    if (!currentBrand) return;
-    
-    setIsLoading(true);
-    try {
-      const zip = new JSZip();
-      
-      const addFileToZip = (dataUrl: string | undefined, name: string) => {
-        if (!dataUrl) return;
-        const b64Data = dataUrl.split(',')[1];
-        zip.file(name, b64Data, { base64: true });
-      };
-
-      addFileToZip(currentBrand.logo, `${currentBrand.name}_Logo.png`);
-      addFileToZip(currentBrand.billboard, `${currentBrand.name}_Billboard.png`);
-      addFileToZip(currentBrand.newspaper, `${currentBrand.name}_Newspaper.png`);
-      addFileToZip(currentBrand.social, `${currentBrand.name}_Social.png`);
-
-      const content = await zip.generateAsync({ type: 'blob' });
-      const url = URL.createObjectURL(content);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `${currentBrand.name}_Brand_Assets.zip`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error('ZIP generation failed:', err);
-      setError('ファイルのまとめ込みに失敗しました。個別にダウンロードしてください。');
-      // Fallback: Individual downloads
-      handleExportAllFallback();
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleExportAllFallback = () => {
+  const handleExportAll = () => {
     if (!currentBrand) return;
     if (currentBrand.logo) handleDownload(currentBrand.logo, `${currentBrand.name}_Logo.png`);
-    setTimeout(() => {
-      if (currentBrand.billboard) handleDownload(currentBrand.billboard, `${currentBrand.name}_Billboard.png`);
-    }, 500);
-    setTimeout(() => {
-      if (currentBrand.newspaper) handleDownload(currentBrand.newspaper, `${currentBrand.name}_Newspaper.png`);
-    }, 1000);
-    setTimeout(() => {
-      if (currentBrand.social) handleDownload(currentBrand.social, `${currentBrand.name}_Social.png`);
-    }, 1500);
+    if (currentBrand.billboard) handleDownload(currentBrand.billboard, `${currentBrand.name}_Billboard.png`);
+    if (currentBrand.newspaper) handleDownload(currentBrand.newspaper, `${currentBrand.name}_Newspaper.png`);
+    if (currentBrand.social) handleDownload(currentBrand.social, `${currentBrand.name}_Social.png`);
   };
 
   return (
@@ -359,17 +288,8 @@ export default function App() {
                       <div className="space-y-4">
                         <div className="flex items-center gap-6">
                           {currentBrand.logo && (
-                            <div className="relative group/logo">
-                              <div className="w-20 h-20 bg-white p-2 rounded-2xl border border-[#141414]/10 shadow-sm overflow-hidden flex-shrink-0">
-                                <img src={currentBrand.logo} alt="Logo" className="w-full h-full object-contain" referrerPolicy="no-referrer" />
-                              </div>
-                              <button 
-                                onClick={() => handleDownload(currentBrand.logo!, `${currentBrand.name}_Logo.png`)}
-                                className="absolute -top-1 -right-1 p-1 bg-[#141414] text-white rounded-full opacity-0 group-hover/logo:opacity-100 transition-opacity shadow-lg"
-                                title="Download Logo"
-                              >
-                                <Download className="w-3 h-3" />
-                              </button>
+                            <div className="w-20 h-20 bg-white p-2 rounded-2xl border border-[#141414]/10 shadow-sm overflow-hidden flex-shrink-0">
+                              <img src={currentBrand.logo} alt="Logo" className="w-full h-full object-contain" referrerPolicy="no-referrer" />
                             </div>
                           )}
                           <div className="space-y-2">
@@ -435,18 +355,7 @@ export default function App() {
                             <Building2 className="w-4 h-4 text-[#5A5A40]" />
                             <span className="text-xs font-bold uppercase tracking-widest">屋外看板 (Billboard)</span>
                           </div>
-                          <div className="flex items-center gap-2">
-                            {currentBrand.billboard && (
-                              <button 
-                                onClick={() => handleDownload(currentBrand.billboard!, `${currentBrand.name}_Billboard.png`)}
-                                className="p-1.5 bg-white/80 hover:bg-white rounded-lg shadow-sm transition-colors"
-                                title="Download"
-                              >
-                                <Download className="w-3.5 h-3.5" />
-                              </button>
-                            )}
-                            <div className="text-[10px] font-mono opacity-40">16:9 / Landscape</div>
-                          </div>
+                          <div className="text-[10px] font-mono opacity-40">16:9 / Landscape</div>
                         </div>
                         <div className="aspect-[16/9] bg-[#EBEBEB] overflow-hidden relative">
                           {currentBrand.billboard ? (
@@ -477,18 +386,7 @@ export default function App() {
                             <Newspaper className="w-4 h-4 text-[#5A5A40]" />
                             <span className="text-xs font-bold uppercase tracking-widest">新聞広告 (Newspaper)</span>
                           </div>
-                          <div className="flex items-center gap-2">
-                            {currentBrand.newspaper && (
-                              <button 
-                                onClick={() => handleDownload(currentBrand.newspaper!, `${currentBrand.name}_Newspaper.png`)}
-                                className="p-1.5 bg-white/80 hover:bg-white rounded-lg shadow-sm transition-colors"
-                                title="Download"
-                              >
-                                <Download className="w-3.5 h-3.5" />
-                              </button>
-                            )}
-                            <div className="text-[10px] font-mono opacity-40">3:4 / Portrait</div>
-                          </div>
+                          <div className="text-[10px] font-mono opacity-40">3:4 / Portrait</div>
                         </div>
                         <div className="aspect-[3/4] bg-[#EBEBEB] overflow-hidden">
                           {currentBrand.newspaper ? (
@@ -519,18 +417,7 @@ export default function App() {
                             <Instagram className="w-4 h-4 text-[#5A5A40]" />
                             <span className="text-xs font-bold uppercase tracking-widest">SNS (Social Media)</span>
                           </div>
-                          <div className="flex items-center gap-2">
-                            {currentBrand.social && (
-                              <button 
-                                onClick={() => handleDownload(currentBrand.social!, `${currentBrand.name}_Social.png`)}
-                                className="p-1.5 bg-white/80 hover:bg-white rounded-lg shadow-sm transition-colors"
-                                title="Download"
-                              >
-                                <Download className="w-3.5 h-3.5" />
-                              </button>
-                            )}
-                            <div className="text-[10px] font-mono opacity-40">1:1 / Square</div>
-                          </div>
+                          <div className="text-[10px] font-mono opacity-40">1:1 / Square</div>
                         </div>
                         <div className="aspect-square bg-[#EBEBEB] overflow-hidden">
                           {currentBrand.social ? (
